@@ -7,8 +7,18 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "andrewdwallo/transmatic": "^1.1",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "bezhansalleh/filament-shield": "^3.3",
+        "doctrine/dbal": "^3.10",
+        "filament/filament": "3.3",
+        "filament/spatie-laravel-media-library-plugin": "^3.2",
+        "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^11.31",
-        "laravel/tinker": "^2.9"
+        "laravel/tinker": "^2.9",
+        "livewire/livewire": "^3.8",
+        "maatwebsite/excel": "^3.1",
+        "wire-elements/modal": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
