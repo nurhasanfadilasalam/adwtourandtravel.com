@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('paket_sayas', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('customer_id')->constrained()->onDelete('cascade'); // Assuming there is a 'customers' table
+            $table->foreignId('booking_id')->constrained()->onDelete('cascade'); // Assuming there is a 'bookings' table
+            $table->foreignId('payment_id')->constrained()->onDelete('cascade'); // Assuming there is a 'payments' table
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade'); // Assuming there is a 'users' table
             $table->timestamps();
         });
     }

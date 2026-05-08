@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('maskapais', function (Blueprint $table) {
             $table->id();
+            $table->string('nama_maskapai');
+            $table->string('kode_iata')->unique();
+            $table->string('kode_icao')->unique();
+            $table->string('logo')->nullable();
             $table->timestamps();
         });
     }

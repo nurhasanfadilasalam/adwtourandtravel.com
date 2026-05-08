@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('muthawifs', function (Blueprint $table) {
             $table->id();
+            $table->string('nama_muthawif');
+            $table->string('nik')->unique();
+            $table->string('no_passport')->nullable();
+            $table->string('nomor_visa')->nullable();
+            $table->date('tgl_awal_visa')->nullable();
+            $table->date('tgl_akhir_visa')->nullable();
+            $table->unsignedBigInteger('id_karyawan')->nullable();
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
+            $table->string('nomor_handphone');
+            $table->string('email')->unique();
+            $table->text('alamat')->nullable();
+            $table->string('photo_url')->nullable();
             $table->timestamps();
         });
     }
