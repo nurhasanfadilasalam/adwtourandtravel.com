@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HotelMekahResource\Pages;
-use App\Filament\Resources\HotelMekahResource\RelationManagers;
-use App\Models\HotelMekah;
+use App\Filament\Resources\HotelMadinahResource\Pages;
+use App\Filament\Resources\HotelMadinahResource\RelationManagers;
+use App\Models\HotelMadinah;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,39 +13,34 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class HotelMekahResource extends Resource
+class HotelMadinahResource extends Resource
 {
-    protected static ?string $model = HotelMekah::class;
+    protected static ?string $model = HotelMadinah::class;
 
-    protected static ?string $navigationGroup = "Master Data";
-
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('nama_hotel')
+                    ->tel()
                     ->required()
                     ->maxLength(200),
                 Forms\Components\TextInput::make('bintang_hotel')
                     ->tel()
-                    ->numeric()
                     ->required()
                     ->maxLength(200),
                 Forms\Components\TextInput::make('tarif_hotel_double_room')
                     ->tel()
-                    ->numeric()
                     ->maxLength(200)
                     ->default(null),
                 Forms\Components\TextInput::make('tarif_hotel_triple_room')
                     ->tel()
-                     ->numeric()
                     ->maxLength(200)
                     ->default(null),
                 Forms\Components\TextInput::make('tarif_hotel_suite_room')
                     ->tel()
-                     ->numeric()
                     ->maxLength(200)
                     ->default(null),
                 Forms\Components\TextInput::make('contact_sales_hotel')
@@ -103,9 +98,9 @@ class HotelMekahResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHotelMekahs::route('/'),
-            'create' => Pages\CreateHotelMekah::route('/create'),
-            'edit' => Pages\EditHotelMekah::route('/{record}/edit'),
+            'index' => Pages\ListHotelMadinahs::route('/'),
+            'create' => Pages\CreateHotelMadinah::route('/create'),
+            'edit' => Pages\EditHotelMadinah::route('/{record}/edit'),
         ];
     }
 }
