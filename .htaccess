@@ -11,6 +11,25 @@ Require all denied
 </IfModule>
 </Files>
 
-<IfModule mod_alias.c>
-RedirectMatch 301 ^/$ https://adwtourandtravel.com/public
+# <IfModule mod_alias.c>
+# RedirectMatch 301 ^/$ https://adwtourandtravel.com/public
+# </IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Pastikan semua permintaan diarahkan ke folder /public
+    # tapi jangan arahkan jika folder/file tersebut memang ada di root
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
+
+# Keamanan tambahan untuk file sensitif
+<Files .env>
+    Order allow,deny
+    Deny from all
+</Files>
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
