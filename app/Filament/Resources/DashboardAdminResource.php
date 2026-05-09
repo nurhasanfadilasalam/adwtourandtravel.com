@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\DashboardAdminResource\Pages;
-use App\Filament\Resources\DashboardAdminResource\Pages\Dashboard;
+
 use App\Models\Booking;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Filament\Resources\DashboardAdminResource\Pages;
 
 
 
@@ -62,7 +62,7 @@ class DashboardAdminResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Dashboard::route('/'),
+            'index' => Pages\Dashboard::route('/'),
             'create' => Pages\CreateDashboardAdmin::route('/create'),
             'edit' => Pages\EditDashboardAdmin::route('/{record}/edit'),
         ];
