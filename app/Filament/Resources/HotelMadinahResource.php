@@ -17,30 +17,35 @@ class HotelMadinahResource extends Resource
 {
     protected static ?string $model = HotelMadinah::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = "Master Data";
+
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('nama_hotel')
-                    ->tel()
                     ->required()
                     ->maxLength(200),
                 Forms\Components\TextInput::make('bintang_hotel')
                     ->tel()
+                    ->numeric()
                     ->required()
                     ->maxLength(200),
                 Forms\Components\TextInput::make('tarif_hotel_double_room')
                     ->tel()
+                     ->numeric()
                     ->maxLength(200)
                     ->default(null),
                 Forms\Components\TextInput::make('tarif_hotel_triple_room')
                     ->tel()
+                     ->numeric()
                     ->maxLength(200)
                     ->default(null),
                 Forms\Components\TextInput::make('tarif_hotel_suite_room')
                     ->tel()
+                     ->numeric()
                     ->maxLength(200)
                     ->default(null),
                 Forms\Components\TextInput::make('contact_sales_hotel')

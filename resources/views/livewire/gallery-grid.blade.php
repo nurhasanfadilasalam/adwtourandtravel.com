@@ -4,7 +4,7 @@
             <div class="col-xl-4 col-lg-4 col-md-6 mt-4">
                 <div class="card bg-transparent border-0 text-center">
                     <div class="card-img">
-                        <img src="{{ asset('storage/' . $gallery->link_gambar) }}" alt="Gallery Image" class="rounded w-100" width="300" height="300">
+                        <img src="{{ asset('storage/' . $gallery->link_gambar) }}" alt="Gallery Image" class="rounded w-100" width="75" height="75">
                     </div>
                     <div class="card-body">
                         <div class="gallery-description">

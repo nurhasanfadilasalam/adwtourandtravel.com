@@ -6,7 +6,13 @@ use App\Filament\Resources\PaketUmrohResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
+
 class CreatePaketUmroh extends CreateRecord
 {
     protected static string $resource = PaketUmrohResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }

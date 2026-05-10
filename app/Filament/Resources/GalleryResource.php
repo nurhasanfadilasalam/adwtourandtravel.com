@@ -2,20 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\GalleryResource\Pages;
-use App\Filament\Resources\GalleryResource\RelationManagers;
-use App\Models\Gallery;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Gallery;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\GalleryResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\GalleryResource\RelationManagers;
+
 
 class GalleryResource extends Resource
 {
     protected static ?string $model = Gallery::class;
+
+    protected static ?string $navigationGroup = "Gallery & Testimoni";
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -23,30 +29,35 @@ class GalleryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('link_gambar')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('deskripsi')
+                RichEditor::make('deskripsi')
                     ->required()
                     ->columnSpanFull(),
+                FileUpload::make('link_gambar')
+                    ->label('Gambar Gallery')
+                    ->image() // Ensures only image files can be uploaded
+                    ->disk('public') // Store files on the 'public' disk (in `storage/app/public`)
+                    ->directory('gallery-files') // Store images in the 'tour-leaders' folder inside the 'public' disk
+                    ->maxSize(1024) // Max size in kilobytes (1MB)
+                    ->enableOpen() // Allow users to open the image
+                    ->columnSpanFull()
+                    ->default(null), // Default value for the field
+
                 Forms\Components\TextInput::make('upload_by')
+                    ->default('Administrator')
+                    ->readOnly()
                     ->required()
                     ->maxLength(255),
             ]);
     }
 
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('link_gambar')
-                    ->searchable(),
+                ImageColumn::make('link_gambar'),
+                Tables\Columns\TextColumn::make('deskripsi')
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('upload_by')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

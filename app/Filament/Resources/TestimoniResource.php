@@ -17,22 +17,43 @@ class TestimoniResource extends Resource
 {
     protected static ?string $model = Testimoni::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = "Gallery & Testimoni";
+
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-bottom-center-text';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
+                // Forms\Components\TextInput::make('user_id')
+                //     ->required()
+                //     ->numeric(),
+                Forms\Components\Select::make('user_id')
+                    ->label('Customer Name')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->default(null),
                 Forms\Components\Textarea::make('content')
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('star_count')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\DateTimePicker::make('last_update'),
+                Forms\Components\Select::make('star_count')
+                    ->label("Rating (Stars)")
+                    ->options([
+                    '5' => '5 Stars',
+                    '4' => '4 Stars',
+                    '3' => '3 Stars',
+                    '2' => '2 Stars',
+                    '1' => '1 Star',
+                    ])
+                    ->default('5')
+                    ->columnSpanFull()
+                    ->required(),
+                Forms\Components\DateTimePicker::make('last_update')
+                    ->label('Last Update')
+                    ->default(now())
+                    ->columnSpanFull()
+                    ->required(),
             ]);
     }
 
@@ -40,13 +61,18 @@ class TestimoniResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
+                // Tables\Columns\TextColumn::make('user_id')
+                //     ->numeric()
+                //     ->sortable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Customer')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('star_count')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('last_update')
-                    ->dateTime()
+                Tables\Columns\TextColumn::make('content')
+                    ->wrap()
+                    ->sortable(),
+                 Tables\Columns\TextColumn::make('star_count')
+                    ->label("Rating (Stars)")
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateMuthawif extends CreateRecord
 {
     protected static string $resource = MuthawifResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }
