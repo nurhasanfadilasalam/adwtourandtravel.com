@@ -20,7 +20,6 @@ class PaketUmrohResource extends Resource
 
     protected static ?string $navigationGroup = "Kelola Paket";
 
-
     protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';

@@ -18,12 +18,12 @@ class EditPaketUmroh extends EditRecord
         ];
     }
 
-    protected function afterSave(): void
-    {
-        Notification::make()
-            ->title('Tanggal paket diperbarui')
-            ->body('Semua jadwal keberangkatan terkait telah disesuaikan.')
-            ->success()
-            ->send();
-    }
+    // protected function afterSave(): void
+    // {
+    //     Notification::make()
+    //         ->title('Tanggal paket diperbarui')
+    //         ->body('Semua jadwal keberangkatan terkait telah disesuaikan.')
+    //         ->success()
+    //         ->send();
+    // }
 }

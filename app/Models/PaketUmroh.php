@@ -32,7 +32,7 @@ class PaketUmroh extends Model
         'durasi_hari' => 'integer',
     ];
 
-      public function hotel_mekah()
+    public function hotel_mekah()
     {
         return $this->belongsTo(HotelMekah::class);
     }
