@@ -94,36 +94,36 @@ class BookingResource extends Resource
                             ->preload()
                             ->reactive()
                             ->columnSpanFull()
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                // $paket = \App\Models\PaketUmroh::find($state);
-                                // Ambil paket beserta jumlah booking yang sudah ada (kecuali yang batal)
-                                $paket = \App\Models\PaketUmroh::withCount([
+                            ->afterStateHydrated(function ($state, callable $set) {
+                                    if (!$state) return;
+                                    $paket = \App\Models\PaketUmroh::withCount([
                                         'bookings' => fn ($query) => $query->whereNotIn('status', ['canceled', 'pending'])
                                     ])->find($state);
-                                if ($paket) {
-                                    $sisa = max(0, $paket->kuota - $paket->bookings_count);
-                                    $set('tanggal_keberangkatan', $paket->tanggal_start);
-                                    $set('tanggal_kembali', $paket->tanggal_end);
-                                    $set('quota', $paket->kuota);
-                                    // $set('sisa_quota', $paket->kuota);
-                                    $set('sisa_quota', $sisa);
-                                    $set('total_price', (float) $paket->harga_paket);
-                                } else {
-
-                                    $set('tanggal_keberangkatan', null);
-                                    $set('tanggal_kembali', null);
-                                    $set('quota', null);
-                                    $set('sisa_quota', null);
-                                    $set('total_price', null);
-                                }
-                            }),
+                                    
+                                    if ($paket) {
+                                        $sisa = max(0, $paket->kuota - $paket->bookings_count);
+                                        $set('sisa_quota', $sisa);
+                                    }
+                                })
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $paket = \App\Models\PaketUmroh::withCount([
+                                            'bookings' => fn ($query) => $query->whereNotIn('status', ['canceled', 'pending'])
+                                        ])->find($state);
+                                    if ($paket) {
+                                        $sisa = max(0, $paket->kuota - $paket->bookings_count);
+                                        $set('tanggal_keberangkatan', $paket->tanggal_start);
+                                        $set('tanggal_kembali', $paket->tanggal_end);
+                                        $set('quota', $paket->kuota);
+                                        $set('sisa_quota', $sisa);
+                                        $set('total_price', (float) $paket->harga_paket);
+                                    }
+                                }),
 
 
                         TextInput::make('sisa_quota')
                             ->label('Sisa Kuota Saat Ini')
                             ->readOnly()
                             ->suffix('Orang')
-                            
                             ->numeric()
                             ->helperText('Kuota tersedia berdasarkan jumlah pendaftar yang valid.'),
 
@@ -156,11 +156,18 @@ class BookingResource extends Resource
 
                  Section::make('Payment')
                     ->schema([
-                        TextInput::make('payment.jumlah_bayar')
+                        TextInput::make('payment_jumlah_bayar')
                             ->label('Jumlah Bayar')
                             ->numeric()
                             ->required()
-                            ->prefix('Rp.'),
+                            ->prefix('Rp.')
+                            ->afterStateHydrated(function ($record, $set) {
+                                if ($record) {
+                                    $firstPayment = $record->payments()->first();
+                                    $set('payment_jumlah_bayar', $firstPayment?->jumlah_bayar);
+                                }
+                            })
+                            ->dehydrated(false),
 
                         DatePicker::make('tanggal_bayar')
                             ->label('Tanggal Bayar')
@@ -191,8 +198,17 @@ class BookingResource extends Resource
                         FileUpload::make('payment.bukti_bayar')
                             ->label('Bukti Bayar')
                             ->disk('public')
+                            ->visibility('public')
                             ->directory('payment-files')
-                            ->image(),
+                            ->image()
+                            ->enableDownload()
+                            ->afterStateHydrated(function ($record, $set) {
+                                if ($record) {
+                                    $firstPayment = $record->payments()->first();
+                                    $set('payment_bukti_bayar', $firstPayment?->bukti_bayar);
+                                }
+                            })
+                            ->dehydrated(false),
                     ])
                     ->columns(2),
 
@@ -241,6 +257,7 @@ class BookingResource extends Resource
                         'waiting_payment' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('total_price')
+                    ->label('Harga Paket')
                     ->prefix('Rp. ')
                     ->numeric()
                     ->sortable(),

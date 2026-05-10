@@ -17,8 +17,10 @@ class JadwalKeberangkatan extends Model
         'maskapai_id',
         'bandara_id',
         'tanggal_keberangkatan',
-        'tanggal_kembali',
         'jam_keberangkatan',
+        'tanggal_kembali',
+        'kuota',
+        'sisa_kuota',
         'status',
     ];
 

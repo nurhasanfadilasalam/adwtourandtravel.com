@@ -13,12 +13,12 @@ class Payment extends Model
     protected $fillable = [
         'booking_id',
         'customer_id',
+        'verified_by',
         'jumlah_bayar',
         'tanggal_bayar',
         'metode_pembayaran',
         'bukti_bayar',
         'status',
-        'verified_by',
         'created_by',
     ];
 
@@ -48,7 +48,7 @@ class Payment extends Model
     // Payment → User (Optional, jika pembayaran diverifikasi admin)
     public function verifier()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
       public function creator()

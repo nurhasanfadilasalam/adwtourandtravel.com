@@ -39,72 +39,34 @@ class PaymentResource extends Resource
         return $form
             ->schema([
                 Section::make([
-                    // Select::make('booking_id')
-                    //     ->label('Booking ID')
-                    //     ->relationship('booking', 'booking_code')
-                    //     ->preload()
-                    //     ->reactive()
-                    //     ->columnSpanFull()
-                    //     ->afterStateUpdated(function ($state, callable $set) {
-                    //         $paket = \App\Models\Booking::find($state);
-                    //         if ($paket) {
-                    //             $set('customer_id', $paket->customer_id);
-                    //             $set('total_price',  (float) $paket->total_price);
-                    //             $set('sisa_tagihan', (float) $paket->sisa_tagihan);
-                    //             // $set('sisa_quota', $paket->kuota);
-                    //             // $set('total_price', (float) $paket->harga_paket);
-                    //         } else {
-                    //             $set('customer_id', null);
-                    //             $set('total_price', null);
-                    //             $set('sisa_tagihan', null);
-                    //             // $set('sisa_quota', null);
-                    //             // $set('total_price', null);
-                    //         }
-                    //     }),
 
-                    // Select::make('booking_id')
-                    //     ->label('Booking ID')
-                    //     ->relationship(
-                    //         'booking',
-                    //         'booking_code',
-                    //         fn($query) => $query->whereNotNull('booking_code')
-                    //     )
-                    //     ->preload()
-                    //     ->reactive()
-                    //     ->columnSpanFull()
-                    //     ->afterStateUpdated(function ($state, callable $set) {
-                    //         $booking = \App\Models\Booking::find($state);
-
-                    //           if ($booking && $booking->customer) {
-                    //             $customer_id = $booking->customer->id; // Use the customer ID, not user_id
-                    //             $set('customer_id', $customer_id);  // Set customer_id field
-                    //             // Set other fields if booking exists
-                    //             $set('total_price', (float) $booking->total_price);
-                    //             $set('sisa_tagihan', (float) $booking->sisa_tagihan);
-                    //         } else {
-                    //             $set('customer_id', null);  // Clear customer_id if no booking found
-                    //             $set('total_price', null);
-                    //             $set('sisa_tagihan', null);
-                    //         }
-                    //     }),
-                     Select::make('booking_id')
+                    Select::make('booking_id')
                         ->label('Nama Customer - Booking ID')
                         ->columnSpanFull()
                         ->relationship(
                             'booking',
                             'booking_code',
-                            fn ($query) => $query->whereNotNull('booking_code')
+                            fn($query) => $query->whereNotNull('booking_code')
                         )
                         ->reactive()
+                      // 1. Ini untuk saat Edit Page dibuka
+                        ->afterStateHydrated(function ($state, callable $set) {
+                            if (!$state) return;
+                            
+                            $booking = \App\Models\Booking::find($state);
+                            if ($booking) {
+                                $set('total_price', (float) $booking->total_price);
+                                $set('sisa_tagihan', (float) $booking->sisa_tagihan);
+                            }
+                        })
+                        // 2. Ini tetap untuk saat Admin ganti booking secara manual
                         ->afterStateUpdated(function ($state, callable $set) {
-                            $booking = \App\Models\Booking::with('customer')->find($state);
-
-                            // dd($booking);
-
-                            $set('customer_id', $booking->customer_id);
-                            $set('total_price', (float) $booking->total_price);
-                            $set('sisa_tagihan', (float) $booking->sisa_tagihan);
-
+                            $booking = \App\Models\Booking::find($state);
+                            if ($booking) {
+                                $set('customer_id', $booking->customer_id);
+                                $set('total_price', (float) $booking->total_price);
+                                $set('sisa_tagihan', (float) $booking->sisa_tagihan);
+                            }
                         }),
 
                     Hidden::make('customer_id')
@@ -127,6 +89,7 @@ class PaymentResource extends Resource
                     TextInput::make('jumlah_bayar')
                         ->numeric()
                         ->required()
+                        ->minValue(1)
                         ->prefix('Rp.')
                         ->rule(function (callable $get) {
                             return function ($attribute, $value, $fail) use ($get) {
@@ -154,16 +117,6 @@ class PaymentResource extends Resource
                             ])
                             ->default('cash')
                             ->required(),
-
-                        // Select::make('status')
-                        //     ->label("Status")
-                        //     ->options([
-                        //         'verified' => 'Verified',
-                        //         'pending' => 'Pending',
-                        //         'rejected' => 'rejected',
-                        //     ])
-                        //     ->default('verified')
-                        //     ->required(),
                     ])->columns(2),
 
                 ])->columns(2),
@@ -175,7 +128,14 @@ class PaymentResource extends Resource
                     ->directory('payment-files') // Store images in the 'tour-leaders' folder inside the 'public' disk
                     ->maxSize(1024) // Max size in kilobytes (1MB)
                     ->enableOpen() // Allow users to open the image
+                    ->enableDownload()
+                    ->visibility('public')
                     ->default(null), // Default value for the field
+
+                Hidden::make('status')
+                    ->default('pending') // Set nilai awal saat form Create dibuka
+                    ->required()
+                    ->dehydrated(true),
 
             ]);
     }
@@ -185,18 +145,18 @@ class PaymentResource extends Resource
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                 Tables\Columns\TextColumn::make('no')
-                ->alignCenter()
-                ->state(
-                    static function (HasTable $livewire, stdClass $rowLoop): string {
-                        return (string) (
-                            $rowLoop->iteration +
-                            ($livewire->getTableRecordsPerPage() * (
-                                $livewire->getTablePage() - 1
-                            ))
-                        );
-                    }
-                ),
+                Tables\Columns\TextColumn::make('no')
+                    ->alignCenter()
+                    ->state(
+                        static function (HasTable $livewire, stdClass $rowLoop): string {
+                            return (string) (
+                                $rowLoop->iteration +
+                                ($livewire->getTableRecordsPerPage() * (
+                                    $livewire->getTablePage() - 1
+                                ))
+                            );
+                        }
+                    ),
                 Tables\Columns\TextColumn::make('booking.booking_code')
                     ->label('Booking Code')
                     ->numeric()
@@ -209,13 +169,14 @@ class PaymentResource extends Resource
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('metode_pembayaran'),
+                
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->alignCenter()
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'verified' => 'success',
-                        'unverified' => 'warning',
+                        'pending' => 'warning', // Sesuaikan dengan database
                         'rejected' => 'danger',
                     }),
                 TextColumn::make('bukti_bayar')
@@ -263,7 +224,7 @@ class PaymentResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
 
-                 Tables\Actions\BulkAction::make('export')
+                Tables\Actions\BulkAction::make('export')
                     ->label('Export Excel')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('success')

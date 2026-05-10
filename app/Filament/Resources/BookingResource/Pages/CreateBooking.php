@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\BookingResource;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Facades\Filament;
 
 class CreateBooking extends CreateRecord
 {
@@ -27,7 +28,7 @@ class CreateBooking extends CreateRecord
                 'total_price' => $data['total_price'],
                 'sisa_tagihan' => $data['total_price'],
                 'metode_pembayaran' => $data['metode_pembayaran'],
-                'created_by' => auth()->id(),
+                'created_by' => Filament::auth()->id(),
             ]);
             $payment = Payment::create([
                 'booking_id' => $booking->id,
@@ -36,15 +37,15 @@ class CreateBooking extends CreateRecord
                 'tanggal_bayar' => $data['tanggal_bayar'],
                 'metode_pembayaran' => $data['payment']['metode_pembayaran'],
                 'bukti_bayar' => $data['payment']['bukti_bayar'] ?? null,
-                'status' => 'unverified',
-                'created_by' => auth()->id(),
+                'status' => 'pending',
+                'created_by' => Filament::auth()->id(),
             ]);
             PaketSaya::create([
                 'customer_id' => $data['customer_id'],
                 'paket_id' => $data['paket_umroh_id'],
                 'booking_id' => $booking->id,
                 'payment_id' => $payment->id,
-                'created_by' => auth()->id(),
+                'created_by' => Filament::auth()->id(),
             ]);
             $sisa = max(0, $booking->total_price - $payment->jumlah_bayar);
 
