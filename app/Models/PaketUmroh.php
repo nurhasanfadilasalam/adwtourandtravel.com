@@ -55,7 +55,7 @@ class PaketUmroh extends Model
     // Helper
     public function getFormattedPriceAttribute()
     {
-        return number_format($this->price, 0, ',', '.');
+        return number_format($this->harga_paket, 0, ',', '.');
     }
 
     public function getUsedQuotaAttribute(): int

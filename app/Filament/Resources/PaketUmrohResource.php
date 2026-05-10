@@ -2,16 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
+use App\Filament\Resources\PaketUmrohResource\Pages;
 use App\Models\PaketUmroh;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\FileUpload;
-use App\Filament\Resources\PaketUmrohResource\Pages;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 
 class PaketUmrohResource extends Resource
@@ -28,27 +32,36 @@ class PaketUmrohResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama_paket')
+                TextInput::make('nama_paket')
                     ->required()
                     ->columnSpanFull()
                     ->maxLength(255),
-                Forms\Components\Textarea::make('deskripsi')
+                Textarea::make('deskripsi')
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('durasi_hari')
+                TextInput::make('durasi_hari')
                     ->suffix('Hari')
                     ->required()
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('kuota')
-                    ->suffix('Orang')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
+
+                // Forms\Components\TextInput::make('kuota')
+                //     ->suffix('Orang')
+                //     ->required()
+                //     ->numeric()
+                //     ->default(0),
                 //new
-                Hidden::make('sisa_kuota')
-                    ->required()
-                    ->dehydrated(true),
-                Forms\Components\TextInput::make('harga_paket')
+                // Hidden::make('sisa_kuota')
+                //     ->required()
+                //     ->dehydrated(true),
+
+                TextInput::make('kuota')
+                    ->numeric()
+                    ->live() // Update sisa_kuota secara real-time di form
+                    ->afterStateUpdated(fn (Forms\Set $set, $state) => $set('sisa_kuota', $state)),
+
+                Hidden::make('sisa_kuota'),
+
+                TextInput::make('harga_paket')
                     ->required()
                     ->prefix('Rp.')
                     ->numeric()
@@ -61,6 +74,7 @@ class PaketUmrohResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required(),
+
                 Select::make('hotel_madinah_id')
                     ->label('Hotel Madinah')
                     ->options(fn () => \App\Models\HotelMadinah::all()
@@ -70,18 +84,19 @@ class PaketUmrohResource extends Resource
                     ->preload()
                     ->required(),
 
-                Forms\Components\DatePicker::make('tanggal_start')
+                DatePicker::make('tanggal_start')
                     ->label('Tanggal Keberangkatan'),
-                Forms\Components\DatePicker::make('tanggal_end')
+                DatePicker::make('tanggal_end')
                     ->label('Tanggal Kepulangan'),
-                Forms\Components\Textarea::make('include')
+                Textarea::make('include')
                     ->default('Visa Umroh, Tour Leader Berpengalaman, Free Sertifikat, Muthawif Tersertifikasi, Perlengkapan Umroh, Tiket Pesawat International/Domestik, Free Air Zam-Zam, Free Doc Photo Video, Hotel-Bus Full AC & Makan 3x')
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('exclude')
-                ->default('Passport, Vaksin Meningitis, Keperluan Pribadi')
+                Textarea::make('exclude')
+                    ->default('Passport, Vaksin Meningitis, Keperluan Pribadi')
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('syarat')
+                Textarea::make('syarat')
                     ->columnSpanFull(),
+
                 FileUpload::make('thumbnail')
                     ->label('Gambar Thumbnail')
                     ->image() // Ensures only image files can be uploaded
@@ -91,7 +106,8 @@ class PaketUmrohResource extends Resource
                     ->enableOpen() // Allow users to open the image
                     ->columnSpanFull()
                     ->default(null), // Default value for the field
-                Forms\Components\Toggle::make('is_active')
+
+                Toggle::make('is_active')
                     ->default(true)
                     ->required(),
             ]);
