@@ -166,8 +166,7 @@ class BookingResource extends Resource
                                     $firstPayment = $record->payments()->first();
                                     $set('payment_jumlah_bayar', $firstPayment?->jumlah_bayar);
                                 }
-                            })
-                            ->dehydrated(false),
+                            }),
 
                         DatePicker::make('tanggal_bayar')
                             ->label('Tanggal Bayar')

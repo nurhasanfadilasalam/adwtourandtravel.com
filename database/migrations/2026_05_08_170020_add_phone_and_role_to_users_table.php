@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('phone')->nullable()->after('password');
 
             // Menambahkan kolom role setelah phone
-            $table->enum('role', ['admin', 'staff', 'customer', 'administrator'])
+            $table->enum('role', ['administrator', 'staff', 'customer'])
                   ->default('customer')
                   ->after('phone');
         });

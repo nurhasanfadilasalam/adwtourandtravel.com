@@ -24,6 +24,7 @@ class Customer extends Model
         'nama_passport',
         'alamat',
         'tgl_lahir',
+        'jenis_kelamin',
         'tempat_lahir',
         'provinsi',
         'kota_kabupaten',

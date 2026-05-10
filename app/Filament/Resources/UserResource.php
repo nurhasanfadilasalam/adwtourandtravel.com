@@ -42,13 +42,13 @@ class UserResource extends Resource
                         ->required()
                         ->unique(table: User::class, ignorable: fn($record) => $record)
                         ->maxLength(255),
-                    // TextInput::make('email')
-                    //     ->email()
-                    //     ->unique(
-                    //         table: User::class,
-                    //         ignorable: fn($record) => $record
-                    //     )
-                    //     ->maxLength(255),
+                    TextInput::make('email')
+                        ->email()
+                        ->unique(
+                            table: User::class,
+                            ignorable: fn($record) => $record
+                        )
+                        ->maxLength(255),
                     TextInput::make('phone')
                         ->tel()
                         ->maxLength(255)

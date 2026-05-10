@@ -43,14 +43,24 @@ class CustomerResource extends Resource
                         Grid::make(2)->schema([
                             TextInput::make('nama_ktp')->required(),
                             TextInput::make('nama_passport'),
+                            Select::make('jenis_kelamin')
+                                ->label('Gender')
+                                ->options([
+                                    'laki-laki' => 'Laki-Laki',
+                                    'perempuan' => 'Perempuan'
+                                ])
+                                ->searchable()
+                                ->default('laki-laki'),
                             TextInput::make('no_ktp')->numeric(),
                             TextInput::make('no_kk')->numeric(),
                             DatePicker::make('tgl_lahir'),
                             TextInput::make('tempat_lahir'),
                             TextInput::make('nama_ayah'),
                             TextInput::make('no_hp')->prefix('+62'),
+                            Textarea::make('alamat'),
+
                         ]),
-                        Textarea::make('alamat')->columnSpanFull(),
+                        
                     ]),
 
                 Section::make('Data Passport')

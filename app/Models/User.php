@@ -107,18 +107,6 @@ class User extends Authenticatable
         return $this->role === 'customer';
     }
 
-    // public function roles()
-    // {
-    //     return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id');
-    // }
-
-    // protected static function booted(): void
-    // {
-    //     static::creating(function (User $user) {
-    //         $user->role = 'customer';
-    //     });
-    // }
-
 
     /**
      * Determine if the user can access the given panel.

@@ -19,6 +19,8 @@ class CreateBooking extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         return DB::transaction(function () use ($data) {
+
+            // dd($data);
             $booking = Booking::create([
                 'customer_id' => $data['customer_id'],
                 'paket_umroh_id' => $data['paket_umroh_id'],
@@ -33,7 +35,7 @@ class CreateBooking extends CreateRecord
             $payment = Payment::create([
                 'booking_id' => $booking->id,
                 'customer_id' => $data['customer_id'],
-                'jumlah_bayar' => $data['payment']['jumlah_bayar'],
+                'jumlah_bayar' => $data['payment_jumlah_bayar'],
                 'tanggal_bayar' => $data['tanggal_bayar'],
                 'metode_pembayaran' => $data['payment']['metode_pembayaran'],
                 'bukti_bayar' => $data['payment']['bukti_bayar'] ?? null,
