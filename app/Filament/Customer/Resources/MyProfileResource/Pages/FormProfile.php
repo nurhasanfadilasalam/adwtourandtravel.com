@@ -95,8 +95,10 @@ class FormProfile extends Page
             ->collapsible()
             ->schema([
                 Grid::make(2)->schema([
-                    TextInput::make('nama_ktp')->required(),
-                     Select::make('jenis_kelamin')
+                    TextInput::make('nama_ktp')
+                        ->label('Nama di KTP')
+                        ->required(),
+                    Select::make('jenis_kelamin')
                                 ->label('Jenis Kelamin')
                                 ->options([
                                     'laki-laki' => 'Laki-Laki',
@@ -104,12 +106,21 @@ class FormProfile extends Page
                                 ])
                                 ->searchable()
                                 ->default('laki-laki'),
-                    TextInput::make('no_ktp')->numeric(),
-                    TextInput::make('no_kk')->numeric(),
-                    DatePicker::make('tgl_lahir'),
-                    TextInput::make('tempat_lahir'),
-                    TextInput::make('nama_ayah'),
-                    TextInput::make('no_hp')->prefix('+62'),
+                    TextInput::make('no_ktp')
+                        ->label('Nomor KTP')
+                        ->numeric(),
+                    TextInput::make('no_kk')
+                        ->label('Nomor KK')
+                        ->numeric(),
+                    DatePicker::make('tgl_lahir')
+                        ->label('Tanggal Lahir'),
+                    TextInput::make('tempat_lahir')
+                        ->label('Tempat Lahir'),
+                    TextInput::make('nama_ayah')
+                        ->label('Nama Ayah Kandung'),
+                    TextInput::make('no_hp')
+                        ->label('Nomor Handphone')
+                        ->prefix('+62'),
                 ]),
                 Textarea::make('alamat')->columnSpanFull(),
                      Grid::make(2)->schema([
