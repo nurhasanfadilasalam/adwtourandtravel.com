@@ -290,8 +290,11 @@ class FormPaketSaya extends Page implements HasForms
                         ->label('Bukti Bayar')
                         ->disk('public')
                         ->directory('payment-files')
+                        ->visibility('public')
+                        ->maxSize(1024)
+                        ->enableOpen() // Allow users to open the image
+                        ->enableDownload()
                         ->image(),
-                    // ->required(),
                 ])
                 ->columns(2)
                 ->statePath('data'),
@@ -412,7 +415,7 @@ class FormPaketSaya extends Page implements HasForms
                 'tanggal_bayar' => $data['data']['tanggal_bayar'],
                 'metode_pembayaran' => $data['data']['payment']['metode_pembayaran'],
                 'bukti_bayar' => $data['data']['payment']['bukti_bayar'],
-                'status' => 'unverified',
+                'status' => 'pending',
                 'created_by' => Filament::auth()->id(),
             ]);
 

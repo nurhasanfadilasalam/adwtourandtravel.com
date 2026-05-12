@@ -242,9 +242,13 @@ class PaketSayaResource extends Resource
 
                         FileUpload::make('bukti_bayar')
                             ->label('Bukti Bayar')
+                            ->image()
                             ->disk('public')
                             ->directory('payment-files')
-                            ->image(),
+                            ->enableOpen() // Allow users to open the image
+                            ->enableDownload()
+                            ->visibility('public'),
+                            
                     ])
                     ->action(function (array $data, Booking $record): void {
                         DB::transaction(function () use ($data, $record) {
@@ -258,7 +262,7 @@ class PaketSayaResource extends Resource
                                 'tanggal_bayar'     => $data['tanggal_bayar'],
                                 'metode_pembayaran' => $data['metode_pembayaran'], // 'cash' / 'transfer' / 'kartu_kredit'
                                 'bukti_bayar'       => $data['bukti_bayar'],
-                                'status'            => 'unverified',
+                                'status'            => 'pending',
                                 'created_by'        => Auth::id(),
                             ]);
 
