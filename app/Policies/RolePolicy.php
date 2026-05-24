@@ -15,7 +15,8 @@ class RolePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_role');
+        // return $user->can('view_any_role');
+        return filament()->getCurrentPanel()?->getId() === 'administrator';
     }
 
     /**

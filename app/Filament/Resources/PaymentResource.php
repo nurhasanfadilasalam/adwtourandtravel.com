@@ -48,6 +48,12 @@ class PaymentResource extends Resource
                             'booking_code',
                             fn($query) => $query->whereNotNull('booking_code')
                         )
+                        ->getOptionLabelFromRecordUsing(function ($record) {
+                            $customer_name = $record->customer->nama_ktp;
+                            $code_booking = $record->booking_code;
+
+                            return "{$customer_name} — {$code_booking}";
+                        })
                         ->reactive()
                       // 1. Ini untuk saat Edit Page dibuka
                         ->afterStateHydrated(function ($state, callable $set) {

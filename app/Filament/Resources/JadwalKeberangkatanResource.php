@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
@@ -11,15 +12,11 @@ use Filament\Resources\Resource;
 use App\Models\JadwalKeberangkatan;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\JadwalKeberangkatanResource\Pages;
-use App\Filament\Resources\JadwalKeberangkatanResource\RelationManagers;
 
 class JadwalKeberangkatanResource extends Resource
 {
@@ -35,145 +32,86 @@ class JadwalKeberangkatanResource extends Resource
     {
         return $form
             ->schema([
-
                 Section::make([
                     Section::make([
-                        // Select::make('paket_umroh_id')
-                        //     ->label('Pilih Paket Umroh')
-                        //     ->relationship('paketUmroh', 'nama_paket')
-                        //     ->preload()
-                        //     ->reactive()
-                        //     ->afterStateUpdated(function ($state, callable $set) {
-                        //         $paket = \App\Models\PaketUmroh::find($state);
-                        //         // dd($paket);
-                        //         if ($paket) {
-                        //             $set('tanggal_keberangkatan', $paket->tanggal_start);
-                        //             $set('tanggal_kembali', $paket->tanggal_end);
-                        //             $set('kuota_paket', $paket->kuota);
-                        //             $set('sisa_kuota_paket', $paket->sisa_kuota);
-                        //         } else {
-                        //             $set('tanggal_keberangkatan', null);
-                        //             $set('tanggal_kembali', null);
-                        //             $set('kuota', null);
-                        //             $set('sisa_kuota', null);
-                        //         }
-                        //     })
-
                         Select::make('paket_umroh_id')
+                            ->label('Pilih Paket Umroh')
                             ->relationship('paketUmroh', 'nama_paket')
-                            ->live() // Lebih baik daripada reactive() di versi terbaru
+                            ->preload()
+                            ->searchable()
+                            ->live()
+                            // 🔑 FIX 1: Memuat data kuota master saat pertama kali halaman EDIT dibuka
+                            ->afterStateHydrated(function ($state, callable $set) {
+                                if (!$state) return;
+                                $paket = PaketUmroh::find($state);
+                                if ($paket) {
+                                    $set('quota_paket', $paket->kuota);
+                                    $set('sisa_quota_paket', $paket->sisa_kuota); // Membaca virtual attribute dinamis
+                                }
+                            })
+                            // 🔑 FIX 2: Memperbarui data kuota master secara real-time saat paket diganti
                             ->afterStateUpdated(function ($state, callable $set) {
-                                $paket = \App\Models\PaketUmroh::find($state);
+                                if (!$state) {
+                                    $set('tanggal_keberangkatan', null);
+                                    $set('tanggal_kembali', null);
+                                    $set('quota_paket', null);
+                                    $set('sisa_quota_paket', null);
+                                    return;
+                                }
+                                $paket = PaketUmroh::find($state);
                                 if ($paket) {
                                     $set('tanggal_keberangkatan', $paket->tanggal_start);
                                     $set('tanggal_kembali', $paket->tanggal_end);
-                                    // Set state untuk placeholder
                                     $set('quota_paket', $paket->kuota);
-                                    $set('sisa_quota_paket', $paket->sisa_kuota);
+                                    $set('sisa_quota_paket', $paket->sisa_kuota); // Membaca virtual attribute dinamis
                                 }
-                            }),
-
-
-                        // Select::make('paket_umroh_id')
-                        //     ->label('Pilih Paket Umroh')
-                        //     ->options(PaketUmroh::query()->pluck('nama_paket', 'id'))
-                        //     ->live() // Make it reactive
-                        // ->afterStateUpdated(function ($state, callable $set) {
-                        //     // Sync package details when a new paket_id is selected
-                        //     $this->syncPaketDetails($state, $set);
-                        // }),
-                        // ->afterStateUpdated(fn ($state, $set) => self::syncPaketDetails($state, $set))
-
-
-                        // Displaying Paket Nama and its details
-                        // TextInput::make('nama_paket')
-                        //     ->label('Nama Paket')
-                        //     ->disabled() // Disable editing
-                        //     ->dehydrated(false), // Don't hydrate this field
+                            })
+                            ->required(),
                     ]),
 
-                    // Section::make([
-                    //     Placeholder::make('kuota_view')
-                    //         ->label('Kuota Awal')
-                    //         ->extraAttributes([
-                    //             'class' => 'text-lg font-semibold text-primary-400',
-                    //         ])
-                    //         ->content(
-                    //             fn($get) =>
-                    //             $get('paket_details.kuota')
-                    //                 ? $get('paket_details.kuota') . ' Orang'
-                    //                 : '-'
-                    //         ),
-                    //     Placeholder::make('sisa_kuota_view')
-                    //         ->label('Kuota Tersedia')
-                    //         ->extraAttributes([
-                    //             'class' => 'text-lg font-semibold text-primary-400',
-                    //         ])
-                    //         ->content(
-                    //             fn($get) =>
-                    //             $get('paket_details.sisa_kuota')
-                    //                 ? $get('paket_details.sisa_kuota') . ' Orang'
-                    //                 : '-'
-                    //         ),
-                    // ])->columns(2),
-
                     Section::make('Informasi Kuota Paket')
-                        ->description('Data kuota yang tersisa pada master paket')
+                        ->description('Data kapasitas kuota yang tersisa pada master paket terkait.')
                         ->schema([
+                            // 🔑 FIX 3: Menghubungkan content placeholder langsung ke form state internal
                             Placeholder::make('view_kuota')
                                 ->label('Total Kuota Paket')
-                                ->content(fn($get) => ($get('quota_paket') ?? 0) . ' Orang'),
+                                ->content(fn($get) => $get('quota_paket') ? $get('quota_paket') . ' Orang' : '-'),
+                            
                             Placeholder::make('view_sisa')
                                 ->label('Sisa Kuota Paket')
-                                ->content(fn($get) => ($get('sisa_quota_paket') ?? 0) . ' Orang'),
+                                ->content(fn($get) => $get('sisa_quota_paket') !== null ? $get('sisa_quota_paket') . ' Orang' : '-'),
                         ])->columns(2),
 
-                    Section::make([
-                        // Select::make('tour_leader_id')
-                        //     ->label('Tour Leader')
-                        //     ->relationship('tourLeader', 'nama_tour_leader')
-                        //     ->searchable()
-                        //     ->preload()
-                        //     ->default(null),
-                        // Select::make('muthawif_id')
-                        //     ->label('Muthawif')
-                        //     ->relationship('muthawif', 'nama_muthawif')
-                        //     ->searchable()
-                        //     ->preload()
-                        //     ->default(null),
-                            Select::make('tour_leader_id')
-                                ->label('Tour Leader')
-                                ->options(fn () => \App\Models\TourLeader::all()
-                                    ->mapWithKeys(fn($c) => [$c->id => (string) ($c->nama_tour_leader ?? '—')])
-                                    ->toArray())
-                                ->searchable()
-                                ->preload()
-                                ->required(),
-
-
-                            Select::make('muthawif_id')
-                                ->label('Muthawif')
-                                ->options(fn () => \App\Models\Muthawif::all()
-                                    ->mapWithKeys(fn($c) => [$c->id => (string) ($c->nama_muthawif ?? '—')])
-                                    ->toArray())
-                                ->searchable()
-                                ->preload()
-                                ->required(),
-
-                    ])
-                        // ->icon('heroicon-o-user')
-                        ->columns(2),
-
+                    // 🔑 FIX 4: Menyediakan input tersembunyi sebagai wadah penampung state memori form
+                    Forms\Components\Hidden::make('quota_paket'),
+                    Forms\Components\Hidden::make('sisa_quota_paket'),
 
                     Section::make([
-                        Forms\Components\Select::make('maskapai_id')
+                        // 🔑 FIX 5: Mengembalikan deklarasi ke ->relationship() agar jauh lebih hemat memory PHP
+                        Select::make('tour_leader_id')
+                            ->label('Tour Leader')
+                            ->relationship('tourLeader', 'nama_tour_leader')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+
+                        Select::make('muthawif_id')
+                            ->label('Muthawif')
+                            ->relationship('muthawif', 'nama_muthawif')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                    ])->columns(2),
+
+                    Section::make([
+                        Select::make('maskapai_id')
                             ->label('Maskapai')
                             ->relationship('maskapai', 'nama_maskapai')
                             ->searchable()
                             ->preload()
                             ->default(null),
 
-                        Forms\Components\Select::make('bandara_id')
+                        Select::make('bandara_id')
                             ->label('Bandara')
                             ->relationship('bandara', 'nama_bandara')
                             ->searchable()
@@ -188,26 +126,12 @@ class JadwalKeberangkatanResource extends Resource
                             ->disabled(fn(callable $get) => filled($get('paket_umroh_id')))
                             ->dehydrated(),
 
-
                         TimePicker::make('jam_keberangkatan')
                             ->required()
                             ->datalist([
-                                '08:00',
-                                '09:00',
-                                '10:00',
-                                '10:30',
-                                '11:00',
-                                '11:30',
-                                '12:00',
-                                '13:00',
-                                '14:00',
-                                '15:00',
-                                '16:00',
-                                '17:00',
-                                '18:00',
-                                '19:00',
-                                '20:00',
-                                '21:00',
+                                '08:00', '09:00', '10:00', '10:30', '11:00', '11:30',
+                                '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+                                '18:00', '19:00', '20:00', '21:00',
                             ]),
                             
                         DatePicker::make('tanggal_kembali')
@@ -224,71 +148,29 @@ class JadwalKeberangkatanResource extends Resource
                                 'closed' => 'Closed',
                                 'full' => 'Full',
                                 'canceled' => 'Canceled',
-                        ])
-                        ->default('draft')
-                        ->required(),
+                            ])
+                            ->default('draft')
+                            ->required(),
                     ])->columns(2),
-
-                    // Section::make([
-                    //     TextInput::make('kuota')
-                    //         ->required()
-                    //         ->numeric()
-                    //         ->disabled(fn(callable $get) => filled($get('paket_umroh_id')))
-                    //         ->dehydrated(),
-                    //     TextInput::make('sisa_kuota')
-                    //         ->required()
-                    //         ->numeric()
-                    //         ->disabled(fn(callable $get) => filled($get('paket_umroh_id')))
-                    //         ->dehydrated(),
-                    // ])->columns(2),
-
-
                 ])
-                    ->icon('heroicon-o-calendar-days')
-                    ->columns(2)
+                ->icon('heroicon-o-calendar-days')
+                ->columns(2)
             ]);
-    }
-
-
-
-    /**
-     * Synchronize Paket Details with the selected PaketUmroh.
-     *
-     * @param int|null $paketId
-     * @param callable $set
-     * @return void
-     */
-
-
-    protected static function syncPaketDetails($paketId, callable $set)
-    {
-        // Fetch PaketUmroh details based on selected paket_id
-        $paket = PaketUmroh::find($paketId);
-
-        // Set the related fields if paket is found
-        if ($paket) {
-            $set('nama_paket', $paket->nama_paket);
-            $set('paket_details.harga_paket', $paket->harga_paket);
-            $set('paket_details.durasi_hari', $paket->durasi_hari);
-            $set('paket_details.include', $paket->include);
-            $set('paket_details.exclude', $paket->exclude);
-            $set('paket_details.tanggal_start', $paket->tanggal_start);
-            $set('paket_details.tanggal_end', $paket->tanggal_end);
-        }
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('tanggal_keberangkatan')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('jam_keberangkatan'),
                 Tables\Columns\TextColumn::make('paketUmroh.nama_paket')
                     ->label('Paket Name')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('tanggal_keberangkatan')
+                    ->date('d M Y')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('jam_keberangkatan')
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('tourLeader.nama_tour_leader')
                     ->label('Tour Leader')
                     ->searchable()
@@ -299,34 +181,36 @@ class JadwalKeberangkatanResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('maskapai.nama_maskapai')
                     ->label('Maskapai')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('bandara.nama_bandara')
                     ->label('Bandara')
-                    ->searchable()
-                    ->sortable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tanggal_kembali')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('kuota')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('sisa_kuota')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status'),
+                    ->date('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                // Menampilkan sisa kuota dinamis langsung dari relasi master paket umrohnya
+                Tables\Columns\TextColumn::make('paketUmroh.sisa_kuota')
+                    ->label('Sisa Kuota Paket')
+                    ->suffix(' Orang')
+                    ->alignCenter(),
+
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'open' => 'success',
+                        'closed' => 'danger',
+                        'full' => 'warning',
+                        'canceled' => 'danger',
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -337,12 +221,7 @@ class JadwalKeberangkatanResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
+    public static function getRelations(): array { return []; }
 
     public static function getPages(): array
     {
