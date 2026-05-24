@@ -115,14 +115,14 @@ class DashboardCustomerResource extends Resource
                     ->color('warning')
                     ->visible(fn(Booking $record) => $record->payments()->exists())
                     ->disabled(function (Booking $record) {
-                        $latestPayment = $record->payments()->latest()->first();
+                        $latestPayment = $record->payments()->oldest()->first();
 
                         // Jika tidak ada payment atau statusnya bukan 'verified', maka disabled = true
                         return ! $latestPayment || $latestPayment->status !== 'verified';
                     })
                     ->action(function (Booking $record) {
 
-                        $payments = $record->payments()->latest()->get();
+                        $payments = $record->payments()->oldest()->get();
 
                         $pdf = Pdf::loadView('reports.invoice-customer', [
                             'booking'  => $record,

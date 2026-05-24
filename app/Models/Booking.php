@@ -116,4 +116,21 @@ class Booking extends Model
         return Carbon::parse($this->tanggal_keberangkatan)
             ->translatedFormat('l, d M Y');
     }
+
+    public function updateSisaTagihan()
+    {
+        // Hitung total bayar dari payment yang statusnya bukan rejected
+        // Karena Anda menggunakan SoftDeletes di Payment, 
+        // payments() secara otomatis hanya mengambil yang belum dihapus.
+        $totalBayar = $this->payments()
+            ->where('status', '!=', 'rejected')
+            ->sum('jumlah_bayar');
+
+        $sisa = max(0, $this->total_price - $totalBayar);
+
+        $this->update([
+            'sisa_tagihan' => $sisa,
+            'status' => $sisa <= 0 ? 'paid' : ($totalBayar > 0 ? 'partial' : 'waiting_payment'),
+        ]);
+    }
 }

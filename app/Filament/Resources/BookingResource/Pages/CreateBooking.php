@@ -49,12 +49,15 @@ class CreateBooking extends CreateRecord
                 'payment_id' => $payment->id,
                 'created_by' => Filament::auth()->id(),
             ]);
-            $sisa = max(0, $booking->total_price - $payment->jumlah_bayar);
 
-            $booking->update([
-                'sisa_tagihan' => $sisa,
-                'status' => $sisa === 0 ? 'paid' : 'partial',
-            ]);
+            // $sisa = max(0, $booking->total_price - $payment->jumlah_bayar);
+
+            // $booking->update([
+            //     'sisa_tagihan' => $sisa,
+            //     'status' => $sisa === 0 ? 'paid' : 'partial',
+            // ]);
+
+            // Sisa tagihan akan terupdate otomatis via static::created di model Payment
 
             return $booking;
         });

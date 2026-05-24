@@ -189,6 +189,7 @@
         <tr>
             <td colspan="4">
                 Payment {{ $index+1 }} {{ $booking->paketUmroh->nama_paket }}
+                
                 ({{ $payment->tanggal_bayar->format('d/m/Y') }})
             </td>
             <td class="text-right">
@@ -196,6 +197,7 @@
             </td>
             <td>
                 {{ ucfirst($payment->metode_pembayaran) }}
+                {!! $loop->first ? '<strong> - DP Awal </strong>' : '' !!}
             </td>
         </tr>
         @endforeach

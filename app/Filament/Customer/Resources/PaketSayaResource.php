@@ -175,21 +175,21 @@ class PaketSayaResource extends Resource
 
                     // Kondisi 2: Tombol DISABLE (abu-abu) jika status payment terbaru bukan 'verified'
                     ->disabled(function (Booking $record) {
-                        $latestPayment = $record->payments()->latest()->first();
+                        $latestPayment = $record->payments()->oldest()->first();
 
                         // Jika tidak ada payment atau statusnya bukan 'verified', maka disabled = true
                         return ! $latestPayment || $latestPayment->status !== 'verified';
                     })
                     ->tooltip('Menunggu Verifikasi Admin - Cetak Invoice Disable')
                     ->tooltip(function (Booking $record) {
-                        $latestPayment = $record->payments()->latest()->first();
+                        $latestPayment = $record->payments()->oldest()->first();
                         if (! $latestPayment || $latestPayment->status !== 'verified') {
                             return 'Invoice tersedia setelah pembayaran diverifikasi admin.';
                         }
                         return null;
                     })
                     ->action(function (Booking $record) {
-                        $payments = $record->payments()->latest()->get();
+                        $payments = $record->payments()->oldest()->get();
 
                         $pdf = Pdf::loadView('reports.invoice-customer', [
                             'booking'  => $record,

@@ -438,15 +438,16 @@ class BookingResource extends Resource
                     ->label('Cetak Invoice')
                     ->icon('heroicon-o-printer')
                     ->color('warning')
+                    ->visible(fn(Booking $record) => $record->payments()->exists())
+                    ->disabled(function (Booking $record) {
+                        $latestPayment = $record->payments()->oldest()->first();
+
+                        // Jika tidak ada payment atau statusnya bukan 'verified', maka disabled = true
+                        return ! $latestPayment || $latestPayment->status !== 'verified';
+                    })
                     ->action(function (Booking $record) {
 
-                        // $payments = $record->payments()->oldest()->get();
-                        
-                        $payments = $record->payments()
-                            ->reorder() // Menghapus urutan bawaan dari model jika ada
-                            ->orderBy('tanggal_bayar', 'asc')
-                            ->orderBy('id', 'asc')
-                            ->get();
+                        $payments = $record->payments()->oldest()->get();
 
                         $pdf = Pdf::loadView('reports.invoice-customer', [
                             'booking'  => $record,

@@ -78,4 +78,33 @@ class Payment extends Model
             default     => ucfirst($this->status),
         };
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Trigger saat payment baru dibuat
+        static::created(function ($payment) {
+            $payment->booking?->updateSisaTagihan();
+        });
+
+        // Trigger saat jumlah_bayar atau status diupdate
+        static::updated(function ($payment) {
+            // Jika booking_id berubah (jarang terjadi), update keduanya
+            if ($payment->isDirty('booking_id')) {
+                Booking::find($payment->getOriginal('booking_id'))?->updateSisaTagihan();
+            }
+            $payment->booking?->updateSisaTagihan();
+        });
+
+        // Trigger saat payment dihapus (Soft Delete)
+        static::deleted(function ($payment) {
+            $payment->booking?->updateSisaTagihan();
+        });
+
+        // Trigger saat data dikembalikan (Restore)
+        static::restored(function ($payment) {
+            $payment->booking?->updateSisaTagihan();
+        });
+    }
 }
