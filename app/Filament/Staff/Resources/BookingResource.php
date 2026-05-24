@@ -440,7 +440,13 @@ class BookingResource extends Resource
                     ->color('warning')
                     ->action(function (Booking $record) {
 
-                        $payments = $record->payments()->oldest()->get();
+                        // $payments = $record->payments()->oldest()->get();
+                        
+                        $payments = $record->payments()
+                            ->reorder() // Menghapus urutan bawaan dari model jika ada
+                            ->orderBy('tanggal_bayar', 'asc')
+                            ->orderBy('id', 'asc')
+                            ->get();
 
                         $pdf = Pdf::loadView('reports.invoice-customer', [
                             'booking'  => $record,

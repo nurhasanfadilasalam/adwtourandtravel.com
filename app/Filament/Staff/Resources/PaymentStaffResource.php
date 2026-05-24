@@ -187,7 +187,7 @@ class PaymentStaffResource extends Resource
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'verified' => 'success',
-                        'unverified' => 'warning',
+                        'pending' => 'warning',
                         'rejected' => 'danger',
                     }),
                 TextColumn::make('bukti_bayar')

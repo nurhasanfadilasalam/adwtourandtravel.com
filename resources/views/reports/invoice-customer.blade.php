@@ -220,7 +220,7 @@
     <br>
 
     <strong>Catatan:</strong><br>
-    Program berlaku selama 2 tahun
+    Pelunasan paling lambat H-30 keberangkatan
 
     {{-- FOOTER --}}
     <div class="footer">
