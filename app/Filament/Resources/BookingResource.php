@@ -371,7 +371,8 @@ class BookingResource extends Resource
 
         do {
             $randomPart = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
-            $code = "ADW-{$paket}-{$customerPart}-{$datePart}-{$randomPart}";
+            // $code = "ADW-{$paket}-{$customerPart}-{$datePart}-{$randomPart}";
+            $code = "ADW-{$customerPart}-{$datePart}-{$randomPart}";
         } while (
             \App\Models\Booking::where('booking_code', $code)->exists()
         );
