@@ -113,12 +113,27 @@ class DashboardCustomerResource extends Resource
                     ->label('Cetak Invoice')
                     ->icon('heroicon-o-printer')
                     ->color('warning')
+                 // Tombol hanya muncul jika sudah pernah ada payment diinput
                     ->visible(fn(Booking $record) => $record->payments()->exists())
-                    ->disabled(function (Booking $record) {
-                        $latestPayment = $record->payments()->oldest()->first();
 
-                        // Jika tidak ada payment atau statusnya bukan 'verified', maka disabled = true
-                        return ! $latestPayment || $latestPayment->status !== 'verified';
+                    // 🔑 KONDISI DISABLE: Jika ADA MINIMAL SATU payment yang statusnya BUKAN 'verified'
+                    ->disabled(function (Booking $record) {
+                        return $record->payments()
+                            ->where('status', '!=', 'verified')
+                            ->exists();
+                    })
+
+                    // 🔑 TOOLTIP DINAMIS: Menyesuaikan kondisi tombol
+                    ->tooltip(function (Booking $record) {
+                        $adaYangBelumVerified = $record->payments()
+                            ->where('status', '!=', 'verified')
+                            ->exists();
+
+                        if ($adaYangBelumVerified) {
+                            return 'Ada pembayaran yang belum diverifikasi oleh admin. Cetak Invoice Dinonaktifkan.';
+                        }
+                        
+                        return 'Cetak Invoice';
                     })
                     ->action(function (Booking $record) {
 

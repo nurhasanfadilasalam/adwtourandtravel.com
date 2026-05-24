@@ -2,10 +2,12 @@
 
 namespace App\Filament\Staff\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\PaketUmroh;
 use Filament\Resources\Resource;
 use App\Models\JadwalKeberangkatan;
 use Filament\Forms\Components\Select;
@@ -17,8 +19,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Staff\Resources\JadwalKeberangkatanResource\Pages;
-use App\Filament\Staff\Resources\JadwalKeberangkatanResource\RelationManagers;
-
 
 class JadwalKeberangkatanResource extends Resource
 {
@@ -39,76 +39,78 @@ class JadwalKeberangkatanResource extends Resource
                         ->label('Pilih Paket Umroh')
                         ->relationship('paketUmroh', 'nama_paket')
                         ->preload()
+                        ->searchable()
                         ->reactive()
                         ->columnSpanFull()
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            $paket = \App\Models\PaketUmroh::find($state);
-                            // dd($paket);
+                        // 🔑 FIX 1: Mengisi data kuota saat halaman EDIT dimuat (Hydration)
+                        ->afterStateHydrated(function ($state, callable $set) {
+                            if (!$state) return;
+                            $paket = PaketUmroh::find($state);
                             if ($paket) {
-                                $set('tanggal_keberangkatan', $paket->tanggal_start);
-                                $set('tanggal_kembali', $paket->tanggal_end);
                                 $set('kuota', $paket->kuota);
-                                $set('sisa_kuota', $paket->sisa_kuota);
-                            } else {
+                                $set('sisa_kuota', $paket->sisa_kuota); // Membaca virtual attribute model
+                            }
+                        })
+                        // 🔑 FIX 2: Mengisi data secara real-time saat paket DIGANTI (Update)
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if (!$state) {
                                 $set('tanggal_keberangkatan', null);
                                 $set('tanggal_kembali', null);
                                 $set('kuota', null);
                                 $set('sisa_kuota', null);
+                                return;
+                            }
+                            
+                            $paket = PaketUmroh::find($state);
+                            if ($paket) {
+                                $set('tanggal_keberangkatan', $paket->tanggal_start);
+                                $set('tanggal_kembali', $paket->tanggal_end);
+                                $set('kuota', $paket->kuota);
+                                $set('sisa_kuota', $paket->sisa_kuota); // Membaca virtual attribute model
                             }
                         }),
 
                     Section::make([
+                        // 🔑 FIX 3: Mengubah path $get() dari 'paket.kuota' menjadi 'kuota' sesuai state form
                         Placeholder::make('kuota_view')
-                            ->label('Kuota Tersedia')
-                            ->extraAttributes([
-                                'class' => 'text-lg font-semibold text-primary-400',
-                            ])
-                            ->content(
-                                fn($get) =>
-                                $get('paket.kuota')
-                                    ? $get('paket.kuota') . ' Orang'
-                                    : '-'
-                            ),
+                            ->label('Total Kuota Paket')
+                            ->extraAttributes(['class' => 'text-lg font-semibold text-primary-400'])
+                            ->content(fn($get) => $get('kuota') ? $get('kuota') . ' Orang' : '-'),
+                        
                         Placeholder::make('sisa_kuota_view')
-                            ->label('Kuota Tersedia')
-                            ->extraAttributes([
-                                'class' => 'text-lg font-semibold text-primary-400',
-                            ])
-                            ->content(
-                                fn($get) =>
-                                $get('paket.sisa_kuota')
-                                    ? $get('paket.sisa_kuota') . ' Orang'
-                                    : '-'
-                            ),
+                            ->label('Sisa Kuota Saat Ini')
+                            ->extraAttributes(['class' => 'text-lg font-semibold text-primary-400'])
+                            ->content(fn($get) => $get('sisa_kuota') !== null ? $get('sisa_kuota') . ' Orang' : '-'),
                     ])->columns(2),
 
+                    // Menyimpan state data kuota agar terbaca oleh Placeholder di atas
+                    Forms\Components\Hidden::make('kuota'),
+                    Forms\Components\Hidden::make('sisa_kuota'),
+
                     Section::make([
-                        Forms\Components\Select::make('tour_leader_id')
+                        Select::make('tour_leader_id')
                             ->label('Tour Leader')
                             ->relationship('tourLeader', 'nama_tour_leader')
                             ->searchable()
                             ->preload()
                             ->default(null),
-                        Forms\Components\Select::make('muthawif_id')
+                        Select::make('muthawif_id')
                             ->label('Muthawif')
                             ->relationship('muthawif', 'nama_muthawif')
                             ->searchable()
                             ->preload()
                             ->default(null),
-                    ])
-                        // ->icon('heroicon-o-user')
-                        ->columns(2),
-
+                    ])->columns(2),
 
                     Section::make([
-                        Forms\Components\Select::make('maskapai_id')
+                        Select::make('maskapai_id')
                             ->label('Maskapai')
                             ->relationship('maskapai', 'nama_maskapai')
                             ->searchable()
                             ->preload()
                             ->default(null),
 
-                        Forms\Components\Select::make('bandara_id')
+                        Select::make('bandara_id')
                             ->label('Bandara')
                             ->relationship('bandara', 'nama_bandara')
                             ->searchable()
@@ -126,22 +128,9 @@ class JadwalKeberangkatanResource extends Resource
                         TimePicker::make('jam_keberangkatan')
                             ->required()
                             ->datalist([
-                                '08:00',
-                                '09:00',
-                                '10:00',
-                                '10:30',
-                                '11:00',
-                                '11:30',
-                                '12:00',
-                                '13:00',
-                                '14:00',
-                                '15:00',
-                                '16:00',
-                                '17:00',
-                                '18:00',
-                                '19:00',
-                                '20:00',
-                                '21:00',
+                                '08:00', '09:00', '10:00', '10:30', '11:00', '11:30',
+                                '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+                                '18:00', '19:00', '20:00', '21:00',
                             ]),
                         DatePicker::make('tanggal_kembali')
                             ->label('Tanggal Kembali')
@@ -149,8 +138,6 @@ class JadwalKeberangkatanResource extends Resource
                             ->disabled(fn(callable $get) => filled($get('paket_umroh_id')))
                             ->dehydrated(),
                     ])->columns(2),
-
-
 
                     Select::make('status')
                         ->label("Status")
@@ -163,13 +150,9 @@ class JadwalKeberangkatanResource extends Resource
                         ])
                         ->default('draft')
                         ->required(),
-
-
                 ])
-                    ->icon('heroicon-o-calendar-days')
-                    ->columns(2)
-
-
+                ->icon('heroicon-o-calendar-days')
+                ->columns(2)
             ]);
     }
 
@@ -200,7 +183,15 @@ class JadwalKeberangkatanResource extends Resource
                 Tables\Columns\TextColumn::make('tanggal_kembali')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status'),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'open' => 'success',
+                        'closed' => 'danger',
+                        'full' => 'warning',
+                        'canceled' => 'danger',
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -210,9 +201,7 @@ class JadwalKeberangkatanResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -223,13 +212,7 @@ class JadwalKeberangkatanResource extends Resource
             ]);
     }
 
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
+    public static function getRelations(): array { return []; }
 
     public static function getPages(): array
     {

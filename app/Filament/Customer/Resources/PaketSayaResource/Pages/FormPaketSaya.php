@@ -118,52 +118,8 @@ class FormPaketSaya extends Page implements HasForms
                                         $set('booking_id', $bookingCode);
                                     }),
 
-
-                                    // Select::make('paket_id')
-                                //     ->label('Pilih Paket Umroh')
-                                //     ->options(PaketUmroh::pluck('nama_paket', 'id'))
-                                //     ->live()
-                                //     ->afterStateUpdated(function ($state, callable $set) {
-
-                                //         $this->syncPaketDetails($state, $set);
-
-                                //         $set('booking_id', $this->generateBookingCode(
-                                //             auth()->id(),
-                                //             $state
-                                //         ));
-                                //     }),
-
-                                // Nested fields showing Paket details
-                                // TextInput::make('paket_details.harga_paket')
-                                //     ->prefix('Rp.')
-                                //     ->label('Harga Paket')
-                                //     ->disabled()
-                                //     ->dehydrated(true)
-                                //     // ->formatStateUsing(fn ($state, $get) =>
-                                //     //     optional(
-                                //     //         PaketUmroh::find($get('paket_id'))
-                                //     //     )->harga_formatted
-                                //     // )
-                                //     ->formatStateUsing(
-                                //         fn($state) =>
-                                //         $state ? number_format($state, 0, ',', '.') : null
-                                //     ),
-
-                                // TextInput::make('paket_details.durasi_hari')
-                                //     ->label('Durasi Hari')
-                                //     ->suffix('Hari')
-                                //     ->disabled()
-                                //     ->dehydrated(true),
                                 Section::make([
-                                    // TextInput::make('paket_details.harga_paket')
-                                    //     ->prefix('Rp.')
-                                    //     ->label('Harga Paket')
-                                    //     ->disabled()
-                                    //     ->dehydrated(true)
-                                    //     ->formatStateUsing(
-                                    //         fn($state) =>
-                                    //         $state ? number_format($state, 0, ',', '.') : null
-                                    //     ),
+                                
                                     Placeholder::make('harga_paket_view')
                                         ->label('Harga Paket')
                                         ->extraAttributes([

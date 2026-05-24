@@ -93,6 +93,9 @@ class BookingResource extends Resource
 
                                             // dd($paket);
 
+                                            // Ambil sisa kuota dinamis lewat virtual attribute model
+                                            $sisaKuotaVirtual = $paket->sisa_kuota;
+
                                             // Cari jadwal keberangkatan
                                             $jadwal = JadwalKeberangkatan::query()
                                                 ->where('paket_umroh_id', $state)
@@ -434,20 +437,52 @@ class BookingResource extends Resource
             ])
             
             ->actions([
-                 Action::make('invoice')
+                //  Action::make('invoice')
+                //     ->label('Cetak Invoice')
+                //     ->icon('heroicon-o-printer')
+                //     ->color('warning')
+                //     ->visible(fn(Booking $record) => $record->payments()->exists())
+                //     ->disabled(function (Booking $record) {
+                //         $latestPayment = $record->payments()->oldest()->first();
+
+                //         // Jika tidak ada payment atau statusnya bukan 'verified', maka disabled = true
+                //         return ! $latestPayment || $latestPayment->status !== 'verified';
+                //     })
+                //     ->action(function (Booking $record) {
+
+                //         $payments = $record->payments()->oldest()->get();
+
+                //         $pdf = Pdf::loadView('reports.invoice-customer', [
+                //             'booking'  => $record,
+                //             'payments' => $payments,
+                //         ]);
+
+                //         return response()->streamDownload(
+                //             fn () => print($pdf->output()),
+                //             'invoice-' . $record->booking_code . '.pdf'
+                //         );
+                //     })
+                //     ->visible(fn (Booking $record) =>
+                //         $record->payments()->exists()
+                //     ),
+                Action::make('invoice')
                     ->label('Cetak Invoice')
                     ->icon('heroicon-o-printer')
                     ->color('warning')
+                    // Tombol muncul hanya jika pendaftar sudah memiliki riwayat pembayaran
                     ->visible(fn(Booking $record) => $record->payments()->exists())
+                    
+                    // 🔑 UPDATE LOGIKA DISABLE: Mengharuskan SEMUA riwayat berstatus 'verified'
                     ->disabled(function (Booking $record) {
-                        $latestPayment = $record->payments()->oldest()->first();
-
-                        // Jika tidak ada payment atau statusnya bukan 'verified', maka disabled = true
-                        return ! $latestPayment || $latestPayment->status !== 'verified';
+                        return $record->payments()->where('status', '!=', 'verified')->exists();
+                    })
+                    ->tooltip(function (Booking $record) {
+                        $adaPending = $record->payments()->where('status', '!=', 'verified')->exists();
+                        return $adaPending ? 'Invoice terkunci. Ada pembayaran yang belum disetujui admin.' : 'Cetak Dokumen Invoice';
                     })
                     ->action(function (Booking $record) {
-
-                        $payments = $record->payments()->oldest()->get();
+                        // Memastikan urutan data dari DP yang pertama masuk hingga cicilan terakhir di paling bawah
+                        $payments = $record->payments()->reorder()->orderBy('id', 'asc')->get();
 
                         $pdf = Pdf::loadView('reports.invoice-customer', [
                             'booking'  => $record,
@@ -458,10 +493,8 @@ class BookingResource extends Resource
                             fn () => print($pdf->output()),
                             'invoice-' . $record->booking_code . '.pdf'
                         );
-                    })
-                    ->visible(fn (Booking $record) =>
-                        $record->payments()->exists()
-                    ),
+                    }),
+                Tables\Actions\EditAction::make(),
 
             ])
             ->bulkActions([

@@ -14,7 +14,7 @@ class PaketUmroh extends Model
         'deskripsi',
         'durasi_hari',
         'kuota',
-        'sisa_kuota',
+        'sisa_kuota', // Kolom ini di DB tidak perlu diisi manual lagi
         'harga_paket',
         'hotel_mekah_id',
         'hotel_madinah_id',
@@ -58,17 +58,35 @@ class PaketUmroh extends Model
         return number_format($this->harga_paket, 0, ',', '.');
     }
 
+    // public function getUsedQuotaAttribute(): int
+    // {
+    //     return $this->bookings()
+    //         ->whereIn('status', ['partial', 'paid'])
+    //         ->where('quota_reduced', true)
+    //         ->count();
+    // }
+
     public function getUsedQuotaAttribute(): int
     {
         return $this->bookings()
-            ->whereIn('status', ['partial', 'paid'])
-            ->where('quota_reduced', true)
+            ->where('status', '!=', 'canceled')
+            // Hapus 'quota_reduced' jika Anda ingin perhitungan murni dari jumlah data
             ->count();
     }
 
-    public function getRemainingQuotaAttribute(): int
+    // public function getRemainingQuotaAttribute(): int
+    // {
+    //     return max(0, $this->kuota - $this->used_quota);
+    // }
+
+    public function getSisaKuotaAttribute(): int
     {
         return max(0, $this->kuota - $this->used_quota);
     }
+
+    /**
+     * Agar sisa_kuota muncul saat model di-convert ke Array/JSON
+     */
+    protected $appends = ['sisa_kuota', 'used_quota'];
 
 }

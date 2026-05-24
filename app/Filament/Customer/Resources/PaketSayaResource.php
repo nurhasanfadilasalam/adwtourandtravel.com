@@ -171,22 +171,27 @@ class PaketSayaResource extends Resource
                     ->label('Cetak Invoice')
                     ->icon('heroicon-o-printer')
                     ->color('warning')
+                    // Tombol hanya muncul jika sudah pernah ada payment diinput
                     ->visible(fn(Booking $record) => $record->payments()->exists())
 
-                    // Kondisi 2: Tombol DISABLE (abu-abu) jika status payment terbaru bukan 'verified'
+                    // 🔑 KONDISI DISABLE: Jika ADA MINIMAL SATU payment yang statusnya BUKAN 'verified'
                     ->disabled(function (Booking $record) {
-                        $latestPayment = $record->payments()->oldest()->first();
-
-                        // Jika tidak ada payment atau statusnya bukan 'verified', maka disabled = true
-                        return ! $latestPayment || $latestPayment->status !== 'verified';
+                        return $record->payments()
+                            ->where('status', '!=', 'verified')
+                            ->exists();
                     })
-                    ->tooltip('Menunggu Verifikasi Admin - Cetak Invoice Disable')
+
+                    // 🔑 TOOLTIP DINAMIS: Menyesuaikan kondisi tombol
                     ->tooltip(function (Booking $record) {
-                        $latestPayment = $record->payments()->oldest()->first();
-                        if (! $latestPayment || $latestPayment->status !== 'verified') {
-                            return 'Invoice tersedia setelah pembayaran diverifikasi admin.';
+                        $adaYangBelumVerified = $record->payments()
+                            ->where('status', '!=', 'verified')
+                            ->exists();
+
+                        if ($adaYangBelumVerified) {
+                            return 'Ada pembayaran yang belum diverifikasi oleh admin. Cetak Invoice Dinonaktifkan.';
                         }
-                        return null;
+                        
+                        return 'Cetak Invoice';
                     })
                     ->action(function (Booking $record) {
                         $payments = $record->payments()->oldest()->get();

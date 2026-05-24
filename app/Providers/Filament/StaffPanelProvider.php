@@ -26,7 +26,7 @@ class StaffPanelProvider extends PanelProvider
         return $panel
             ->id('staff')
             ->path('staff')
-            ->login()
+            // ->login()
             ->login(\App\Filament\Customer\Pages\Auth\Login::class)
             ->colors([
                 'primary' => Color::Blue,

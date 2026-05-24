@@ -40,13 +40,29 @@ class BookingResource extends Resource
 
                 Section::make([
                     Section::make([
+                       
                         Select::make('customer_id')
                             ->label('Customer')
-                            ->relationship('customer', 'nama_ktp')
-                            ->getOptionLabelFromRecordUsing(
-                                fn($record) => $record->nama_ktp
-                                    ?? 'Customer #' . $record->id
+                            // 1. Modifikasi query relasi untuk membawa data user agar efisien (Eager Loading)
+                            ->relationship(
+                                name: 'customer', 
+                                titleAttribute: 'nama_ktp',
+                                modifyQueryUsing: fn (Builder $query) => $query->with('user')
                             )
+                            // 2. Gabungkan nama_ktp dan username di sini
+                            ->getOptionLabelFromRecordUsing(function ($record) {
+                                $namaKtp = $record->nama_ktp ?? 'Customer #' . $record->id;
+                                
+                                // Ambil username dari relasi user jika tersedia
+                                $username = $record->user?->username; 
+
+                                // Jika username ada, tampilkan "Nama KTP (Username)", jika tidak ada tampilkan "Nama KTP" saja
+                                return $username 
+                                    ? "{$namaKtp} ({$username})" 
+                                    : $namaKtp;
+                            })
+                            ->searchable() // Sangat disarankan ditambahkan agar admin mudah mencari berdasarkan nama/username
+                            ->preload()    // Memuat data di awal agar transisi pencarian lebih lancar
                             ->reactive()
                             ->afterStateUpdated(
                                 fn($state, callable $set, callable $get) =>
@@ -284,6 +300,29 @@ class BookingResource extends Resource
                 //
             ])
             ->actions([
+                Action::make('invoice')
+                    ->label('Cetak Invoice')
+                    ->icon('heroicon-o-printer')
+                    ->color('warning')
+                    ->visible(fn(Booking $record) => $record->payments()->exists())
+                    ->disabled(function (Booking $record) {
+                        return $record->payments()->where('status', '!=', 'verified')->exists();
+                    })
+                    ->tooltip(function (Booking $record) {
+                        $adaPending = $record->payments()->where('status', '!=', 'verified')->exists();
+                        return $adaPending ? 'Ada pembayaran belum disetujui.' : 'Cetak Invoice';
+                    })
+                    ->action(function (Booking $record) {
+                        $payments = $record->payments()->reorder()->orderBy('id', 'asc')->get();
+                        $pdf = Pdf::loadView('reports.invoice-customer', [
+                            'booking'  => $record,
+                            'payments' => $payments,
+                        ]);
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            'invoice-' . $record->booking_code . '.pdf'
+                        );
+                    }),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -330,7 +369,7 @@ class BookingResource extends Resource
 
         do {
             $randomPart = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
-            $code = "ADW-{$customerPart}-{$datePart}-{$randomPart}";
+            $code = "ADW-{$paket}-{$customerPart}-{$datePart}-{$randomPart}";
         } while (
             \App\Models\Booking::where('booking_code', $code)->exists()
         );
