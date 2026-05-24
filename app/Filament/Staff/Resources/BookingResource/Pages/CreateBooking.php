@@ -56,7 +56,7 @@ class CreateBooking extends CreateRecord
                 'tanggal_bayar' => $data['tanggal_bayar'],
                 'metode_pembayaran' => $data['payment']['metode_pembayaran'],
                 'bukti_bayar' => $data['payment']['bukti_bayar'] ?? null,
-                'status' => 'unverified',
+                'status' => 'pending',
                 'created_by' => auth()->id(),
             ]);
 
