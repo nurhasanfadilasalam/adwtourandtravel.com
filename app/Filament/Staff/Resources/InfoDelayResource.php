@@ -51,12 +51,12 @@ class InfoDelayResource extends Resource
                                 $set('tanggal_keberangkatan', $paket->tanggal_start);
                                 $set('tanggal_kembali', $paket->tanggal_end);
                                 $set('quota', $paket->kuota);
-                                $set('sisa_quota', $paket->kuota);
+                                $set('sisa_kuota', $paket->kuota);
                             } else {
                                 $set('tanggal_keberangkatan', null);
                                 $set('tanggal_kembali', null);
                                 $set('quota', null);
-                                $set('sisa_quota', null);
+                                $set('sisa_kuota', null);
                             }
                         }),
                     Section::make([
@@ -132,7 +132,7 @@ class InfoDelayResource extends Resource
                             ->numeric()
                             ->disabled(fn(callable $get) => filled($get('paket_umroh_id')))
                             ->dehydrated(),
-                        TextInput::make('sisa_quota')
+                        TextInput::make('sisa_kuota')
                             ->required()
                             ->numeric()
                             ->disabled(fn(callable $get) => filled($get('paket_umroh_id')))
@@ -199,10 +199,10 @@ class InfoDelayResource extends Resource
                 Tables\Columns\TextColumn::make('tanggal_kembali')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('quota')
+                Tables\Columns\TextColumn::make('kuota')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sisa_quota')
+                Tables\Columns\TextColumn::make('sisa_kuota')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status'),

@@ -325,7 +325,7 @@ class FormPaketSaya extends Page implements HasForms
         $jadwal = JadwalKeberangkatan::query()
             ->where('paket_umroh_id', $paketId)
             ->whereDate('tanggal_keberangkatan', $paket->tanggal_start)
-            // ->where('sisa_quota', '>', 0)
+            // ->where('sisa_kuota', '>', 0)
             ->first();
 
         if (! $jadwal) {

@@ -97,7 +97,7 @@ class BookingResource extends Resource
                                             $jadwal = JadwalKeberangkatan::query()
                                                 ->where('paket_umroh_id', $state)
                                                 ->whereDate('tanggal_keberangkatan', $paket->tanggal_start)
-                                                ->where('sisa_quota', '>', 0)
+                                                ->where('sisa_kuota', '>', 0)
                                                 ->first();
 
                                             if (! $jadwal) {

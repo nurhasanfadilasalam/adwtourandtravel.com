@@ -99,10 +99,10 @@ class BookingResource extends Resource
                                     $paket = \App\Models\PaketUmroh::withCount([
                                         'bookings' => fn ($query) => $query->whereNotIn('status', ['canceled', 'pending'])
                                     ])->find($state);
-                                    
+
                                     if ($paket) {
                                         $sisa = max(0, $paket->kuota - $paket->bookings_count);
-                                        $set('sisa_quota', $sisa);
+                                        $set('sisa_kuota', $sisa);
                                     }
                                 })
                                 ->afterStateUpdated(function ($state, callable $set) {
@@ -114,13 +114,13 @@ class BookingResource extends Resource
                                         $set('tanggal_keberangkatan', $paket->tanggal_start);
                                         $set('tanggal_kembali', $paket->tanggal_end);
                                         $set('quota', $paket->kuota);
-                                        $set('sisa_quota', $sisa);
+                                        $set('sisa_kuota', $sisa);
                                         $set('total_price', (float) $paket->harga_paket);
                                     }
                                 }),
 
 
-                        TextInput::make('sisa_quota')
+                        TextInput::make('sisa_kuota')
                             ->label('Sisa Kuota Saat Ini')
                             ->readOnly()
                             ->suffix('Orang')
@@ -305,8 +305,8 @@ class BookingResource extends Resource
             return;
         }
 
-        $set('quota', $paket->kuota);
-        $set('sisa_quota', $paket->kuota);
+        $set('kuota', $paket->kuota);
+        $set('sisa_kuota', $paket->kuota);
         $set('total_price', (float) $paket->harga_paket);
     }
 

@@ -59,7 +59,14 @@ class CustomerResource extends Resource
                     ->schema([
                         Grid::make(2)->schema([
                             TextInput::make('nama_ktp')->required(),
-                            TextInput::make('nama_passport'),
+                             Select::make('jenis_kelamin')
+                                ->label('Jenis Kelamin')
+                                ->options([
+                                    'laki-laki' => 'Laki-Laki',
+                                    'perempuan' => 'Perempuan',
+                                ])
+                                ->searchable()
+                                ->default('laki-laki'),
                             TextInput::make('no_ktp')->numeric(),
                             TextInput::make('no_kk')->numeric(),
                             DatePicker::make('tgl_lahir'),
@@ -74,6 +81,7 @@ class CustomerResource extends Resource
                     ->collapsible()
                     ->schema([
                         Grid::make(2)->schema([
+                            TextInput::make('nama_passport'),
                             TextInput::make('no_passport'),
                             TextInput::make('kota_passport'),
                             DatePicker::make('tgl_dikeluarkan_passport'),
@@ -437,8 +445,11 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('nama_ktp')
                     ->label('Nama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nama_passport')
+                Tables\Columns\TextColumn::make('jenis_kelamin')
+                    ->label('Gender')
                     ->searchable(),
+                // Tables\Columns\TextColumn::make('nama_passport')
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('no_ktp')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('no_kk')
