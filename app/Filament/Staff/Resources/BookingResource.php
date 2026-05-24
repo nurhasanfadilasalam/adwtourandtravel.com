@@ -432,6 +432,7 @@ class BookingResource extends Resource
             ->filters([
                 //
             ])
+            
             ->actions([
                  Action::make('invoice')
                     ->label('Cetak Invoice')
@@ -439,7 +440,7 @@ class BookingResource extends Resource
                     ->color('warning')
                     ->action(function (Booking $record) {
 
-                        $payments = $record->payments()->latest()->get();
+                        $payments = $record->payments()->oldest()->get();
 
                         $pdf = Pdf::loadView('reports.invoice-customer', [
                             'booking'  => $record,
