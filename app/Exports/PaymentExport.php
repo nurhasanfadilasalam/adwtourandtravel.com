@@ -9,21 +9,34 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Database\Eloquent\Builder;
 
 class PaymentExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles
 {
     protected int $maxCicilan = 0;
+    protected Builder $query;
 
-    /**
-     * Ambil data booking + payment
-     */
-    public function collection(): Collection
+    // 1. Terima query dari Filament lewat constructor
+    public function __construct(Builder $query)
     {
-        $bookings = Booking::with([
+        // Query asal dari Payment, kita ambil booking_id yang unik saja
+        $bookingIds = $query->pluck('booking_id')->unique()->toArray();
+
+        // Buat query baru khusus untuk Booking berdasarkan ID tersebut
+        $this->query = Booking::whereIn('id', $bookingIds)->with([
             'customer',
             'paketUmroh',
             'payments' => fn ($q) => $q->orderBy('tanggal_bayar'),
-        ])->get();
+        ]);
+    }
+
+    /**
+     * Ambil data booking + payment sesuai query yang difilter
+     */
+    public function collection(): Collection
+    {
+        // 2. Jalankan query yang sudah difilter
+        $bookings = $this->query->get();
 
         // Cari cicilan terbanyak
         $this->maxCicilan = $bookings

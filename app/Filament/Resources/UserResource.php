@@ -35,14 +35,16 @@ class UserResource extends Resource
             ->schema([
                 Section::make([
                     TextInput::make('name')
+                        ->label('Nama Lengkap')
                         ->required()
                         ->maxLength(255),
                     TextInput::make('username')
-                        ->label('Username')
+                        ->label('Username (silahkan masukkan NIK)')
                         ->required()
                         ->unique(table: User::class, ignorable: fn($record) => $record)
                         ->maxLength(255),
                     TextInput::make('email')
+                        ->label('Email')
                         ->email()
                         ->unique(
                             table: User::class,

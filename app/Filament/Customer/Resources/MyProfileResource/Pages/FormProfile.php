@@ -96,7 +96,7 @@ class FormProfile extends Page
             ->schema([
                 Grid::make(2)->schema([
                     TextInput::make('nama_ktp')
-                        ->label('Nama di KTP')
+                        ->label('Nama Sesuai KTP')
                         ->required(),
                     Select::make('jenis_kelamin')
                                 ->label('Jenis Kelamin')
@@ -107,11 +107,11 @@ class FormProfile extends Page
                                 ->searchable()
                                 ->default('laki-laki'),
                     TextInput::make('no_ktp')
-                        ->label('Nomor KTP')
+                        ->label('NIK')
                         ->numeric(),
-                    TextInput::make('no_kk')
-                        ->label('Nomor KK')
-                        ->numeric(),
+                    // TextInput::make('no_kk')
+                    //     ->label('Nomor KK')
+                    //     ->numeric(),
                     DatePicker::make('tgl_lahir')
                         ->label('Tanggal Lahir'),
                     TextInput::make('tempat_lahir')

@@ -76,7 +76,7 @@ class PendaftaranResource extends Resource
                         Grid::make()
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Nama Lengkap')
+                                    ->label('Nama sesuai KTP')
                                     ->required()
                                     ->columnSpanFull()
                                     ->maxLength(255),
@@ -90,9 +90,10 @@ class PendaftaranResource extends Resource
                                     ->maxLength(20),
 
                                 TextInput::make('username')
-                                    ->label('Username')
-                                    ->required()
+                                    ->label('Username (silahkan masukkan NIK)')
                                     ->unique(table: User::class, ignorable: fn($record) => $record)
+                                    ->required()
+                                    ->numeric()
                                     ->maxLength(255),
 
                                 // TextInput::make('email')

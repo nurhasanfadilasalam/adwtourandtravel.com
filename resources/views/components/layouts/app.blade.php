@@ -54,7 +54,7 @@
                         <li class="nav-item "> <a class="nav-link" href="{{ route('gallery') }}">Gallery</a></li>
                     </ul>
                     @guest
-                        <a href="{{ route('login') }}" class="btn btn-warning">Daftar/Masuk</a>
+                        <a href="{{ route('login') }}" class="btn btn-warning">Masuk</a>
                         {{-- <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="{{ route('beranda') }}" id="btn-warning" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hi, ADWers </a>
             <div class="dropdown-menu" aria-labelledby="btn-warning">

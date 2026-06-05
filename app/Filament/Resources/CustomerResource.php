@@ -32,7 +32,7 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-heart';
 
-     public static function form(Form $form): Form
+    public static function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -41,39 +41,35 @@ class CustomerResource extends Resource
                     ->collapsible()
                     ->schema([
                         Grid::make(2)->schema([
-                            TextInput::make('nama_ktp')->required(),
-                            TextInput::make('nama_passport'),
+                            TextInput::make('nama_ktp')
+                                ->label('Nama Sesuai KTP')
+                                ->required(),
                             Select::make('jenis_kelamin')
-                                ->label('Gender')
+                                ->label('Jenis Kelamin')
                                 ->options([
                                     'laki-laki' => 'Laki-Laki',
                                     'perempuan' => 'Perempuan'
                                 ])
                                 ->searchable()
                                 ->default('laki-laki'),
-                            TextInput::make('no_ktp')->numeric(),
-                            TextInput::make('no_kk')->numeric(),
-                            DatePicker::make('tgl_lahir'),
-                            TextInput::make('tempat_lahir'),
-                            TextInput::make('nama_ayah'),
-                            TextInput::make('no_hp')->prefix('+62'),
-                            Textarea::make('alamat'),
-
+                            TextInput::make('no_ktp')
+                                ->label('NIK')
+                                ->numeric(),
+                            // TextInput::make('no_kk')->numeric(),
+                            DatePicker::make('tgl_lahir')
+                                ->label('Tanggal Lahir'),
+                            TextInput::make('tempat_lahir')
+                                ->label('Tempat Lahir'),
+                            TextInput::make('nama_ayah')
+                                ->label('Nama Ayah'),
+                            TextInput::make('no_hp')
+                                ->label('Nomor HP')
+                                ->prefix('+62'),
+                            Textarea::make('alamat')
+                                ->label('Alamat'),
                         ]),
-                        
-                    ]),
 
-                Section::make('Data Passport')
-                    ->collapsible()
-                    ->schema([
-                        Grid::make(2)->schema([
-                            TextInput::make('no_passport'),
-                            TextInput::make('kota_passport'),
-                            DatePicker::make('tgl_dikeluarkan_passport'),
-                            DatePicker::make('tgl_habis_passport'),
-                        ]),
                     ]),
-
                 Section::make('Data Tambahan')
                     ->collapsible()
                     ->schema([
@@ -173,6 +169,25 @@ class CustomerResource extends Resource
                         ]),
                     ]),
 
+
+
+                Section::make('Data Passport')
+                    ->collapsible()
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('nama_passport')
+                                ->label('Nama Passport'),
+                            TextInput::make('no_passport')
+                                ->label('No Passport'),
+                            TextInput::make('kota_passport')
+                                ->label('Kota Passport'),
+                            DatePicker::make('tgl_dikeluarkan_passport')
+                                ->label('Tgl Dikeluarkan Passport'),
+                            DatePicker::make('tgl_habis_passport')
+                                ->label('Tgl Habis Passport'),
+                        ]),
+                    ]),
+
                 Section::make('Upload Dokumen')
                     ->collapsible()
                     ->schema([
@@ -227,7 +242,7 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->defaultSort('created_at', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('no')
                     ->alignCenter()
@@ -245,7 +260,7 @@ class CustomerResource extends Resource
                     ->label('Nama Customer')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('jenis_kelamin')
-                    ->label('Gender')
+                    ->label('Jenis Kelamin')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('no_hp')
                     ->label('No HP')

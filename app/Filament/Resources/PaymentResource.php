@@ -229,15 +229,31 @@ class PaymentResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+                // Tables\Actions\BulkAction::make('export')
+                //     ->label('Export Excel')
+                //     ->icon('heroicon-o-document-arrow-down')
+                //     ->color('success')
+                //     ->action(function ($livewire) {
+                //         return Excel::download(
+                //             new PaymentExport($livewire->getFilteredTableQuery()),
+                //             'payment_data.xlsx'
+                //         );
+                //     }),
 
                 Tables\Actions\BulkAction::make('export')
                     ->label('Export Excel')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('success')
-                    ->action(function ($livewire) {
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records, HasTable $livewire) {
+                        // Jika admin mencentang data tertentu, filter berdasarkan ID yang dicentang
+                        // Jika tidak mencentang apa pun (atau pilih semua), gunakan filtered query dari tabel
+                        $query = $records->count() > 0 
+                            ? Payment::whereIn('id', $records->pluck('id'))
+                            : $livewire->getFilteredTableQuery();
+
                         return Excel::download(
-                            new PaymentExport($livewire->getFilteredTableQuery()),
-                            'payment_data.xlsx'
+                            new PaymentExport($query),
+                            'payment_data_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
                         );
                     }),
                 // Add a bulk action to change the status
