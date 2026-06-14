@@ -163,11 +163,14 @@ class PaymentResource extends Resource
                             );
                         }
                     ),
+                Tables\Columns\TextColumn::make('customer.nama_ktp')
+                    ->label('Customer')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('booking.booking_code')
                     ->label('Booking Code')
                     ->numeric()
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('jumlah_bayar')
                     ->numeric()
                     ->sortable(),
@@ -203,13 +206,11 @@ class PaymentResource extends Resource
                             ? 'Image'
                             : '';
                     }),
-
                 TextColumn::make('verifier.name')
                     ->label('Verifier')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -144,9 +144,12 @@ class CustomerResource extends Resource
                             Select::make('jenis_pendidikan')
                                 ->label('Pendidikan Terakhir')
                                 ->options([
+                                   'Tidak Sekolah' => 'Tidak Sekolah',
                                     'SD' => 'SD',
                                     'SMP' => 'SMP',
                                     'SMA' => 'SMA / SMK',
+                                    'D1' => 'D1',
+                                    'D2' => 'D2',
                                     'D3' => 'D3',
                                     'S1' => 'S1',
                                     'S2' => 'S2',
@@ -259,6 +262,10 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama Customer')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('no_ktp')
+                    ->label('NIK')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('jenis_kelamin')
                     ->label('Jenis Kelamin')
                     ->sortable(),

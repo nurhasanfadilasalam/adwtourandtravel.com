@@ -169,6 +169,10 @@ class PaymentStaffResource extends Resource
                             );
                         }
                     ),
+                    
+                Tables\Columns\TextColumn::make('customer.nama_ktp')
+                    ->label('Customer')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('booking.booking_code')
                     ->label('Booking Code')
                     ->numeric()
@@ -232,7 +236,7 @@ class PaymentStaffResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
 
                 // Add a bulk action to change the status
