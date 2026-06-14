@@ -75,7 +75,7 @@ class BookingResource extends Resource
                                     Select::make('paket_umroh_id')
                                         ->label('Pilih Paket Umroh')
                                         ->columnSpanFull()
-                                    
+
                                         ->options(
                                             PaketUmroh::query()
                                                 ->orderBy('nama_paket')
@@ -212,7 +212,7 @@ class BookingResource extends Resource
                                         ])
                                         : '-'
                                 ),
-                        
+
                         ])
                             ->columns(2), // Bind all fields to $this->data
 
@@ -420,13 +420,13 @@ class BookingResource extends Resource
                         ->badge(),
                 Tables\Columns\TextColumn::make('creator.name')
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Tanggal Dibuat')
-                    ->dateTime()
-                    ->sortable()
-                    ->formatStateUsing(function ($state) {
-                        return \Carbon\Carbon::parse($state)->translatedFormat('l, d F Y');
-                    }),
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->label('Tanggal Dibuat')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->formatStateUsing(function ($state) {
+                //         return \Carbon\Carbon::parse($state)->translatedFormat('l, d F Y');
+                //     }),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -435,7 +435,7 @@ class BookingResource extends Resource
             ->filters([
                 //
             ])
-            
+
             ->actions([
                 //  Action::make('invoice')
                 //     ->label('Cetak Invoice')
@@ -471,7 +471,7 @@ class BookingResource extends Resource
                     ->color('warning')
                     // Tombol muncul hanya jika pendaftar sudah memiliki riwayat pembayaran
                     ->visible(fn(Booking $record) => $record->payments()->exists())
-                    
+
                     // 🔑 UPDATE LOGIKA DISABLE: Mengharuskan SEMUA riwayat berstatus 'verified'
                     ->disabled(function (Booking $record) {
                         return $record->payments()->where('status', '!=', 'verified')->exists();
