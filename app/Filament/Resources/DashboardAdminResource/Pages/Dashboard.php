@@ -27,8 +27,7 @@ class Dashboard extends Page
         $totalPayment = Payment::where('status', 'verified')
             ->sum('jumlah_bayar');
 
-        $totalTagihan = Booking::where('status', 'partial')
-            ->sum('total_price');
+        $totalTagihan = Booking::sum('total_price');
 
         return [
             [
